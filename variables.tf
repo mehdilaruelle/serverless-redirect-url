@@ -5,6 +5,7 @@ variable "region" {
 }
 
 variable "destination_url" {
+  type        = string
   description = "The URL destination for the redirection. This should be an URL (e.g. https://mehdilaruelle.com)."
 }
 
