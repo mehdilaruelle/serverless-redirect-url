@@ -4,10 +4,6 @@ on:
   push:
     branches: [main]
   pull_request:
-  # Provider upgrades break configurations silently. Catch it weekly rather
-  # than the next time someone needs to deploy.
-  schedule:
-    - cron: "0 6 * * 1"
   workflow_dispatch:
 
 permissions:
