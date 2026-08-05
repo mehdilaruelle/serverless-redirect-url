@@ -84,18 +84,41 @@ $ terraform destroy
 After that, don't forget to remove:
 - The `certificate` on [AWS Certificate Manager](https://aws.amazon.com/fr/certificate-manager/)
 
+## Upgrading from the AWS provider v5
+
+This project now requires the **AWS provider v6**, which
+[removed](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/guides/version-6-upgrade#resource-aws_api_gateway_deployment)
+the `stage_name` argument from `aws_api_gateway_deployment`. The `prod` stage is
+now managed explicitly by the `aws_api_gateway_stage.prod` resource.
+
+If you already deployed this project with the v5 provider, the `prod` stage
+exists in AWS but not in your Terraform state. Import it before applying,
+otherwise the apply fails with `ConflictException: Stage already exists`:
+
+```bash
+$ terraform init -upgrade
+$ terraform state show aws_api_gateway_rest_api.shortener | grep "^    id"
+$ terraform import aws_api_gateway_stage.prod <rest_api_id>/prod
+$ terraform plan
+```
+
+The plan should then report no change on the stage itself. The
+`aws_api_gateway_deployment.prod` resource gains a `triggers` argument in this
+version, so a one-off redeployment is expected on the first apply.
+
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~>5.0 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.5.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~>6.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 5.7.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 6.57.1 |
 
 ## Modules
 
@@ -118,13 +141,14 @@ No modules.
 | [aws_api_gateway_method_response.url_redirect_response](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/api_gateway_method_response) | resource |
 | [aws_api_gateway_resource.proxy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/api_gateway_resource) | resource |
 | [aws_api_gateway_rest_api.shortener](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/api_gateway_rest_api) | resource |
+| [aws_api_gateway_stage.prod](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/api_gateway_stage) | resource |
 | [aws_acm_certificate.source](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/acm_certificate) | data source |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_destination_url"></a> [destination\_url](#input\_destination\_url) | The URL destination for the redirection. This should be an URL (e.g. https://mehdilaruelle.com). | `any` | n/a | yes |
+| <a name="input_destination_url"></a> [destination\_url](#input\_destination\_url) | The URL destination for the redirection. This should be an URL (e.g. https://mehdilaruelle.com). | `string` | n/a | yes |
 | <a name="input_region"></a> [region](#input\_region) | AWS region used by the provider | `string` | `"eu-west-3"` | no |
 | <a name="input_source_domain_names"></a> [source\_domain\_names](#input\_source\_domain\_names) | The list of domain names source to rewrite as a destination\_domain\_name. This should be a domain name (e.g. blog.mehdilaruelle.ninja). | `list(string)` | n/a | yes |
 

@@ -112,15 +112,37 @@ resource "aws_api_gateway_method_response" "proxy" {
 
 # DEPLOY
 resource "aws_api_gateway_deployment" "prod" {
-  description = "Production stage"
+  description = "Production deployment"
   rest_api_id = aws_api_gateway_rest_api.shortener.id
 
-  stage_name        = "prod"
-  stage_description = "Production stage"
+  # Redeploy the API whenever the routing configuration changes. Without this,
+  # API Gateway keeps serving the snapshot taken on the first apply.
+  triggers = {
+    redeployment = sha1(jsonencode([
+      aws_api_gateway_method.url_redirect.id,
+      aws_api_gateway_integration.url_redirect.id,
+      aws_api_gateway_integration_response.url_redirect.id,
+      aws_api_gateway_method_response.url_redirect_response.id,
+      aws_api_gateway_resource.proxy.id,
+      aws_api_gateway_method.proxy.id,
+      aws_api_gateway_integration.proxy.id,
+      aws_api_gateway_integration_response.proxy.id,
+      aws_api_gateway_method_response.proxy.id,
+    ]))
+  }
 
   lifecycle {
     create_before_destroy = true
   }
+}
+
+# The stage used to be created implicitly by the deployment, but `stage_name`
+# was removed from `aws_api_gateway_deployment` in AWS provider v6.
+resource "aws_api_gateway_stage" "prod" {
+  description   = "Production stage"
+  rest_api_id   = aws_api_gateway_rest_api.shortener.id
+  deployment_id = aws_api_gateway_deployment.prod.id
+  stage_name    = "prod"
 }
 
 resource "aws_api_gateway_domain_name" "custom" {
@@ -140,6 +162,6 @@ resource "aws_api_gateway_base_path_mapping" "test" {
   count = length(var.source_domain_names)
 
   api_id      = aws_api_gateway_rest_api.shortener.id
-  stage_name  = aws_api_gateway_deployment.prod.stage_name
+  stage_name  = aws_api_gateway_stage.prod.stage_name
   domain_name = aws_api_gateway_domain_name.custom[count.index].domain_name
 }
