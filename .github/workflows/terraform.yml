@@ -24,7 +24,6 @@ jobs:
       - name: terraform fmt
         run: terraform fmt -check -recursive -diff
 
-      # -backend=false: no credentials and no state are needed to validate.
       - name: terraform init
         run: terraform init -backend=false -input=false
 
