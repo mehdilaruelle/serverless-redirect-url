@@ -149,6 +149,7 @@ No modules.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_destination_url"></a> [destination\_url](#input\_destination\_url) | The URL destination for the redirection. This should be an URL (e.g. https://mehdilaruelle.com). | `string` | n/a | yes |
+| <a name="input_redirect_status_code"></a> [redirect\_status\_code](#input\_redirect\_status\_code) | HTTP status code returned by the redirection. 301 and 308 are permanent and cached by browsers for a very long time; 302 and 307 are temporary and safe to change your mind about. | `number` | `301` | no |
 | <a name="input_region"></a> [region](#input\_region) | AWS region used by the provider | `string` | `"eu-west-3"` | no |
 | <a name="input_source_domain_names"></a> [source\_domain\_names](#input\_source\_domain\_names) | The list of domain names source to rewrite as a destination\_domain\_name. This should be a domain name (e.g. blog.mehdilaruelle.ninja). | `list(string)` | n/a | yes |
 

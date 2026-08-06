@@ -30,7 +30,7 @@ resource "aws_api_gateway_integration" "url_redirect" {
   type        = "MOCK"
 
   request_templates = {
-    "application/json" : "{ \"statusCode\": 301 }"
+    "application/json" : "{ \"statusCode\": ${var.redirect_status_code} }"
   }
 }
 
@@ -49,7 +49,7 @@ resource "aws_api_gateway_method_response" "url_redirect_response" {
   rest_api_id = aws_api_gateway_rest_api.shortener.id
   resource_id = aws_api_gateway_rest_api.shortener.root_resource_id
   http_method = aws_api_gateway_method.url_redirect.http_method
-  status_code = "301"
+  status_code = var.redirect_status_code
 
   response_parameters = {
     "method.response.header.Location" : true
@@ -77,7 +77,7 @@ resource "aws_api_gateway_integration" "proxy" {
   type        = "MOCK"
 
   request_templates = {
-    "application/json" : "{ \"statusCode\": 301 }"
+    "application/json" : "{ \"statusCode\": ${var.redirect_status_code} }"
   }
 }
 
@@ -103,7 +103,7 @@ resource "aws_api_gateway_method_response" "proxy" {
   rest_api_id = aws_api_gateway_rest_api.shortener.id
   resource_id = aws_api_gateway_resource.proxy.id
   http_method = aws_api_gateway_method.proxy.http_method
-  status_code = "301"
+  status_code = var.redirect_status_code
 
   response_parameters = {
     "method.response.header.Location" : true
