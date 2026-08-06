@@ -1,3 +1,31 @@
+locals {
+  # REST APIs expose no raw query string variable, so it has to be rebuilt from
+  # the parsed parameter map. Leaves $query empty when the request has none.
+  rebuild_query_string = <<-VTL
+    #set($query = "")
+    #foreach($key in $input.params().get('querystring').keySet())
+    #set($query = "$query$key=$util.urlEncode($input.params().get('querystring').get($key))")
+    #if($foreach.hasNext)#set($query = "$query&")#end
+    #end
+    #if($query != "")
+    #set($query = "?$query")
+    #end
+  VTL
+
+  # GET / -> destination, carrying the query string over.
+  root_response_template = <<-EOF
+    ${trimspace(local.rebuild_query_string)}
+    #set($context.responseOverride.header.Location = "${var.destination_url}$query")
+  EOF
+
+  # /* -> destination, carrying both the path and the query string over.
+  proxy_response_template = <<-EOF
+    #set($path = $input.params().get('path').get('proxy'))
+    ${trimspace(local.rebuild_query_string)}
+    #set($context.responseOverride.header.Location = "${var.destination_url}/$path$query")
+  EOF
+}
+
 data "aws_acm_certificate" "source" {
   count = length(var.source_domain_names)
 
@@ -42,6 +70,10 @@ resource "aws_api_gateway_integration_response" "url_redirect" {
 
   response_parameters = {
     "method.response.header.Location" : "'${var.destination_url}'"
+  }
+
+  response_templates = {
+    "application/json" = local.root_response_template
   }
 }
 
@@ -92,10 +124,7 @@ resource "aws_api_gateway_integration_response" "proxy" {
   }
 
   response_templates = {
-    "application/json" = <<EOF
-#set($Path = $input.params().get('path').get('proxy') )
-#set($context.responseOverride.header.Location = "${var.destination_url}/$Path")
-EOF
+    "application/json" = local.proxy_response_template
   }
 }
 
@@ -117,6 +146,11 @@ resource "aws_api_gateway_deployment" "prod" {
 
   # Redeploy the API whenever the routing configuration changes. Without this,
   # API Gateway keeps serving the snapshot taken on the first apply.
+  #
+  # The resource ids only cover create and replace. An edit to a response
+  # template is an in-place update that leaves every id untouched, so the
+  # templates have to be hashed themselves or the new mapping never reaches
+  # the stage.
   triggers = {
     redeployment = sha1(jsonencode([
       aws_api_gateway_method.url_redirect.id,
@@ -128,6 +162,8 @@ resource "aws_api_gateway_deployment" "prod" {
       aws_api_gateway_integration.proxy.id,
       aws_api_gateway_integration_response.proxy.id,
       aws_api_gateway_method_response.proxy.id,
+      local.root_response_template,
+      local.proxy_response_template,
     ]))
   }
 
