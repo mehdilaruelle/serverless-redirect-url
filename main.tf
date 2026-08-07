@@ -7,7 +7,7 @@ data "aws_acm_certificate" "source" {
 }
 
 resource "aws_api_gateway_rest_api" "shortener" {
-  name        = "redirector"
+  name        = var.api_name
   description = "Redirector URL serverless"
 
   endpoint_configuration {

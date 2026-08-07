@@ -1,3 +1,9 @@
+variable "api_name" {
+  type        = string
+  description = "Name of the Amazon API Gateway REST API. Worth changing when several instances of this project share an AWS account, since API Gateway allows duplicate names and the console then shows several identical entries."
+  default     = "redirector"
+}
+
 variable "region" {
   type        = string
   description = "AWS region used by the provider"
