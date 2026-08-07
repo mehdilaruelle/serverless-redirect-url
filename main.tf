@@ -145,6 +145,20 @@ resource "aws_api_gateway_stage" "prod" {
   stage_name    = "prod"
 }
 
+# The redirect is a public unauthenticated endpoint. Without an explicit limit
+# it draws on the account-wide API Gateway quota, which is shared with every
+# other REST API in the region.
+resource "aws_api_gateway_method_settings" "throttling" {
+  rest_api_id = aws_api_gateway_rest_api.shortener.id
+  stage_name  = aws_api_gateway_stage.prod.stage_name
+  method_path = "*/*"
+
+  settings {
+    throttling_rate_limit  = var.throttling_rate_limit
+    throttling_burst_limit = var.throttling_burst_limit
+  }
+}
+
 resource "aws_api_gateway_domain_name" "custom" {
   count = length(var.source_domain_names)
 

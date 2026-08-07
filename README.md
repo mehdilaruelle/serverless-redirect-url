@@ -139,6 +139,7 @@ No modules.
 | [aws_api_gateway_method.url_redirect](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/api_gateway_method) | resource |
 | [aws_api_gateway_method_response.proxy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/api_gateway_method_response) | resource |
 | [aws_api_gateway_method_response.url_redirect_response](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/api_gateway_method_response) | resource |
+| [aws_api_gateway_method_settings.throttling](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/api_gateway_method_settings) | resource |
 | [aws_api_gateway_resource.proxy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/api_gateway_resource) | resource |
 | [aws_api_gateway_rest_api.shortener](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/api_gateway_rest_api) | resource |
 | [aws_api_gateway_stage.prod](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/api_gateway_stage) | resource |
@@ -153,6 +154,8 @@ No modules.
 | <a name="input_redirect_status_code"></a> [redirect\_status\_code](#input\_redirect\_status\_code) | HTTP status code returned by the redirection. 301 and 308 are permanent and cached by browsers for a very long time; 302 and 307 are temporary and safe to change your mind about. | `number` | `301` | no |
 | <a name="input_region"></a> [region](#input\_region) | AWS region used by the provider | `string` | `"eu-west-3"` | no |
 | <a name="input_source_domain_names"></a> [source\_domain\_names](#input\_source\_domain\_names) | The list of domain names source to rewrite as a destination\_domain\_name. This should be a domain name (e.g. blog.mehdilaruelle.ninja). | `list(string)` | n/a | yes |
+| <a name="input_throttling_burst_limit"></a> [throttling\_burst\_limit](#input\_throttling\_burst\_limit) | Size of the token bucket, i.e. how large a spike the stage absorbs before throttling. Set to -1 to fall back on the account-wide API Gateway quota. | `number` | `200` | no |
+| <a name="input_throttling_rate_limit"></a> [throttling\_rate\_limit](#input\_throttling\_rate\_limit) | Sustained requests per second allowed on the stage, across all methods. Set to -1 to fall back on the account-wide API Gateway quota. | `number` | `100` | no |
 
 ## Outputs
 
