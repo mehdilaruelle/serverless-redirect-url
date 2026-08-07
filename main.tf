@@ -158,10 +158,17 @@ resource "aws_api_gateway_domain_name" "custom" {
   }
 }
 
-resource "aws_api_gateway_base_path_mapping" "test" {
+resource "aws_api_gateway_base_path_mapping" "custom" {
   count = length(var.source_domain_names)
 
   api_id      = aws_api_gateway_rest_api.shortener.id
   stage_name  = aws_api_gateway_stage.prod.stage_name
   domain_name = aws_api_gateway_domain_name.custom[count.index].domain_name
+}
+
+# Renamed from "test". Without this block Terraform would destroy and
+# recreate the mapping, taking the redirect offline for the duration.
+moved {
+  from = aws_api_gateway_base_path_mapping.test
+  to   = aws_api_gateway_base_path_mapping.custom
 }
