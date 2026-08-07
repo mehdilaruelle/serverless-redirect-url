@@ -1,21 +1,21 @@
 # Serverless Redirect URL
 
-This project is aim to deploy a serverless solution to redirect an URL source to another URL destination by keeping the
+This project deploys a serverless solution that redirects a source URL to a destination URL while keeping
 the source path.
 
-This solution use only [Amazon API Gateway](https://aws.amazon.com/fr/api-gateway/) for the redirection
+This solution uses only [Amazon API Gateway](https://aws.amazon.com/fr/api-gateway/) for the redirection
 and [AWS Certificate Manager](https://aws.amazon.com/fr/certificate-manager/) for the HTTPS of the URL source.
 
 ## Prerequisites
 
-You need to be a owner of domain names (source(s) and destination).
+You need to own the domain names (source(s) and destination).
 
 ### Setting up the public certificate for your URL source
 
-Our Terraform does not create the certificate in ACM (AWS Certificate Manager) (because it depends on where your domain name is located).
+Our Terraform does not create the certificate in ACM (AWS Certificate Manager), because that depends on where your domain name is located.
 > In our case, we assume that you do not have a Hosted Zone in [Amazon Route 53](https://aws.amazon.com/fr/route53/).
 
-**This action must be done for EACH URL sources and NOT for the URL destination.**
+**This action must be done for EACH URL source and NOT for the URL destination.**
 
 **TO DO**: [Create the public certificate in ACM](https://docs.aws.amazon.com/acm/latest/userguide/gs-acm-request-public.html)
 
@@ -26,12 +26,12 @@ Our Terraform does not create the certificate in ACM (AWS Certificate Manager) (
 The Terraform deploys:
 - An **Amazon API Gateway**: It is used as a redirect URL. To do a proper redirection, it needs a certificate from ACM.
 
-## How is it working ?
+## How does it work?
 
 Before starting, you need to check if:
 - You have created `the public certificate in ACM`
 
-If so, you can now be able to deploy your infrastructure.
+If so, you are ready to deploy your infrastructure.
 
 ### Deployment of the solution
 
@@ -43,7 +43,7 @@ To deploy this solution, you should do it in 2 steps:
 
 Add a `terraform.tfvars` file with the following variables and values:
 - `destination_url` : is the URL destination to return. **This should be an URL (e.g. https://mehdilaruelle.com)**.
-- `source_domain_names` : is a list of source domain name to transform into the URL destination. **This should be a domain name (e.g. blog.mehdilaruelle.ninja)**.
+- `source_domain_names` : is a list of source domain names to transform into the URL destination. **This should be a domain name (e.g. blog.mehdilaruelle.ninja)**.
 
 > Also, create `backend.tf` file with your own Terraform backend configuration if needed.
 
@@ -57,11 +57,11 @@ $ terraform apply
 #### Step 2: Configure your DNS zone
 
 Now, the solution is deployed and you need to configure your DNS zone to "point to the Amazon API Gateway domain name".
-For that, you need create a `CNAME` record to your DNS zone from your **domain name source** with the **value of
+For that, you need to create a `CNAME` record in your DNS zone from your **domain name source** with the **value of
 the Amazon API Gateway**.
 
-To **find the value**, you need to do the following command: `terraform output domain_name`.
-The output represent a map with the **domain name source** and the **value of the Amazon API Gateway**.
+To **find the value**, run the following command: `terraform output domain_name`.
+The output is a map of the **domain name source** to the **value of the Amazon API Gateway**.
 
 For example, in my case, we have the following output:
 ```bash
@@ -72,7 +72,7 @@ domain_name = {
 
 I need to create a `CNAME` record in the DNS zone `blog.mehdilaruelle.ninja` with the following value `d-f17x6w9fd4.execute-api.eu-west-3.amazonaws.com`.
 
-When the job is done, you can test the URL redirection. For example, in my case, the `https://blog.mehdilaruelle.ninja` will redirect to `https://mehdilaruelle.com`.
+When the job is done, you can test the URL redirection. For example, in my case, `https://blog.mehdilaruelle.ninja` will redirect to `https://mehdilaruelle.com`.
 
 ### Cleanup
 
@@ -161,6 +161,6 @@ No modules.
 
 ## Contact
 
-You see something wrong ? You want extra information or more ?
+Do you see something wrong? Do you want extra information or more?
 
 Contact me: 3exr269ch@mozmail.com
